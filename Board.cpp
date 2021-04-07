@@ -8,9 +8,13 @@
 using namespace std;
 
 namespace ariel {
-
-
-    void Board::initiliezFirstTime (unsigned int row, unsigned int column)
+    
+    /*
+     * Initializes the minimum row and minimum column
+     * to be what is given in the question, 
+     * if this is the first time something is added to the board.
+     */
+    void Board::initializesFirstTime (unsigned int row, unsigned int column)
     {
            if(isFirstTime)
            {    
@@ -20,9 +24,13 @@ namespace ariel {
            }
     }
 
+    /*
+    *Function that updates the maximum and minimum row number,
+    *the maximum and minimum column number, 
+    *according to the values given and previous data of the table.
+    */
     void Board::update_min_max_raw_col(unsigned int row, unsigned int column)
     {
-        
         //row min-max update
         if(row>max_row)
         {
@@ -32,7 +40,6 @@ namespace ariel {
         {
             min_row=row;
         }
-
         //column min-max update
         if(column>max_col)
         {
@@ -43,58 +50,52 @@ namespace ariel {
             min_col=column;
         }
     }
-
+    /*
+    *Post horizantal messege on the board
+    */
     void Board::postHorizontal(unsigned int row, unsigned int column, string const & message)
     {
         int str_len=message.length();  
-        initiliezFirstTime (row,column);
-
-        // if(isFirstTime())
-        // {
-        //     min_row=row;
-        //     min_col=column;
-        // }
+        initializesFirstTime (row,column);
         update_min_max_raw_col(row,column);
-
-        //   //if the row doesnt exist already   
-        // if(board_map.find(row)==board_map.end())
-        // {
-        //     map<int, char> empty_map;
-        //     board_map.insert({row,empty_map} );
-        // }
-
         for(size_t i=0;i<str_len;i++)
         {
-            //column min-max update
+            //max column update
             if(column>max_col)
             {
                 max_col=column;
             }
-
-            board_map[row][column]=message.at(i);
+            board_map[row][column]=message.at(i);            
             column++;
         }
     }
+
+    /*
+    *Post vertical messege on the board
+    */
     void  Board::postVertical(unsigned int row, unsigned int column, string const & message)
     {
         int str_len=message.length(); 
 
-        initiliezFirstTime (row,column);
+        initializesFirstTime (row,column);
         update_min_max_raw_col(row,column);
 
         for(size_t i=0;i<str_len;i++)
         {
-            //row min-max update
+            //max row update
             if(row>max_row)
             {
                 max_row=row;
             }
-
             board_map[row][column]=message.at(i);
             row++;
         }
 
     }
+
+    /*
+    *Post messege on the board
+    */
     void Board::post(unsigned int row, unsigned int column, Direction direction, string const & message) {
 
         //empty meesege
@@ -102,7 +103,6 @@ namespace ariel {
         {
             return;
         }
-
        switch (direction)
        {
        case Direction::Horizontal:
@@ -115,93 +115,77 @@ namespace ariel {
     }
     
       
-  
-    // bool isEmptyLoc(unsigned int row,unsigned int column)
-    // {
-
-    // }
+    /*
+    *A function that receives a row and a column
+    *and returns the corresponding character on the board.
+    */
+    char Board:: charInLoc(unsigned int row,unsigned int column)
+    {
+        map<unsigned int,map<unsigned int,char>>::iterator itr_rows;
+        map<unsigned int,char>::iterator itr_columns;
+        char char_in_loc=EMPTY_CHAR;
+        itr_rows=board_map.find(row);
+        //if the row exist in the map
+        if(itr_rows!=board_map.end())
+        {
+            itr_columns=(itr_rows->second).find(column);
+            //if the column exist in the map
+            if(itr_columns!=(itr_rows->second).end())
+            {
+                char_in_loc=itr_columns->second;
+            }
+        }
+        return char_in_loc;
+    }
+    /*
+    *Read horizontal messege from the board
+    */
     string Board::readHorizontal(unsigned int row, unsigned int column, unsigned int length)
     {
         string ans;
-        map<unsigned int,map<unsigned int,char>>::iterator itr_rows;
-        map<unsigned int,char>::iterator itr_columns;
-        char char_to_add=EMPTY_CHAR;
         for (size_t i = 0; i < length; i++)
         {
-           itr_rows=board_map.find(row);
-           if(itr_rows!=board_map.end())
-           {
-               itr_columns=(itr_rows->second).find(column+i);
-               if(itr_columns!=(itr_rows->second).end())
-               {
-                   char_to_add=itr_columns->second;
-               }
-           }
-
-           ans+=char_to_add;
-            char_to_add=EMPTY_CHAR;
+           ans+=charInLoc(row,column+i);
         }
         return ans;
     }
+    /*
+    *Read vertical messege from the board
+    */
     string Board::readVertical(unsigned int row, unsigned int column, unsigned int length)
     {
         string ans;
-        map<unsigned int,map<unsigned int,char>>::iterator itr_rows;
-        map<unsigned int,char>::iterator itr_columns;
-        char char_to_add=EMPTY_CHAR;
         for (size_t i = 0; i < length; i++)
         {
-           itr_rows=board_map.find(row+i);
-           if(itr_rows!=board_map.end())
-           {
-               itr_columns=(itr_rows->second).find(column);
-               if(itr_columns!=(itr_rows->second).end())
-               {
-                   char_to_add=itr_columns->second;
-               }
-           }
-
-           ans+=char_to_add;
-            char_to_add=EMPTY_CHAR;
+           ans+=charInLoc(row+i,column);
         }
         return ans;
 
     }
+    /*
+    *Read horizontal messege from the board
+    */
     string Board::read(unsigned int row, unsigned int column, Direction direction, unsigned int length) {
        switch (direction)
        {
-       case Direction::Horizontal:
-           return(readHorizontal(row, column, length));
+        case Direction::Horizontal:
+            return(readHorizontal(row, column, length));
         case Direction::Vertical:
            return(readVertical(row, column, length));
        }
     }
+    /*
+    *A function that displays the board to the screen
+    */
     void Board::show() {
-        char char_to_print=EMPTY_CHAR;
-        // cout<<"\t min col"<<min_col<<": ";
-        map<unsigned int,map<unsigned int,char>>::iterator itr_rows;
-        map<unsigned int,char>::iterator itr_columns;
-       
-          for(size_t i=min_row;i<=max_row;i++)
-          {
-            cout<<i<<": ";
-            itr_rows=board_map.find(i);
-
-            for(size_t j=min_col;j<=max_col;j++)
-            {
-                if(itr_rows!=board_map.end())
-                    {
-                        itr_columns=(itr_rows->second).find(j);
-                        if(itr_columns!=(itr_rows->second).end())
-                        {
-                            char_to_print=itr_columns->second;
-                        }
-                    }
-                cout<<char_to_print;
-                char_to_print=EMPTY_CHAR;
-            }
+        cout<<"start column: "<<min_col<<" "<<endl<<endl;
+        for(size_t row=min_row;row<=max_row;row++)
+        {
+            //print row number
+            cout<<row<<": ";
+            cout<<read( row, min_col, Direction::Horizontal,max_col-min_col+1);
             cout<<endl;
-
-         }
+        }
     }
+    
 };
